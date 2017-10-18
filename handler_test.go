@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/lonnng/nano/component"
-	"github.com/lonnng/nano/internal/message"
-	"github.com/lonnng/nano/serialize/json"
-	"github.com/lonnng/nano/serialize/protobuf"
-	"github.com/lonnng/nano/session"
+	"github.com/kensomanpow/nano/component"
+	"github.com/kensomanpow/nano/internal/message"
+	"github.com/kensomanpow/nano/serialize/json"
+	"github.com/kensomanpow/nano/serialize/protobuf"
+	"github.com/kensomanpow/nano/session"
 )
 
 func BenchmarkPointerReflectNewValue(b *testing.B) {

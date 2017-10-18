@@ -28,10 +28,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/lonnng/nano/internal/codec"
-	"github.com/lonnng/nano/internal/message"
-	"github.com/lonnng/nano/internal/packet"
-	"github.com/lonnng/nano/session"
+	"github.com/kensomanpow/nano"
+	"github.com/kensomanpow/nano/internal/codec"
+	"github.com/kensomanpow/nano/internal/message"
+	"github.com/kensomanpow/nano/internal/packet"
+	"github.com/kensomanpow/nano/session"
 )
 
 const (
@@ -44,6 +45,8 @@ var (
 	// ErrBufferExceed indicates that the current session buffer is full and
 	// can not receive more data.
 	ErrBufferExceed = errors.New("session send buffer exceed")
+	// AgentGroup 裝所有的Agent
+	AgentGroup = nano.NewGroup("agents")
 )
 
 type (
@@ -85,6 +88,8 @@ func newAgent(conn net.Conn) *agent {
 	s := session.New(a)
 	a.session = s
 	a.srv = reflect.ValueOf(s)
+
+	AgentGroup.Add(s)
 
 	return a
 }
@@ -167,6 +172,8 @@ func (a *agent) Close() error {
 		logger.Println(fmt.Sprintf("Session closed, ID=%d, UID=%d, IP=%s",
 			a.session.ID(), a.session.UID(), a.conn.RemoteAddr()))
 	}
+
+	AgentGroup.Leave(a.session)
 
 	// prevent closing closed channel
 	select {
