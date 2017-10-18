@@ -28,7 +28,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/kensomanpow/nano"
 	"github.com/kensomanpow/nano/internal/codec"
 	"github.com/kensomanpow/nano/internal/message"
 	"github.com/kensomanpow/nano/internal/packet"
@@ -46,7 +45,7 @@ var (
 	// can not receive more data.
 	ErrBufferExceed = errors.New("session send buffer exceed")
 	// AgentGroup 裝所有的Agent
-	AgentGroup = nano.NewGroup("agents")
+	AgentGroup = NewGroup("agents")
 )
 
 type (
