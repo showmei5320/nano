@@ -160,6 +160,7 @@ func (c *Connector) On(event string, callback Callback) {
 
 // Close close the connection, and shutdown the benchmark
 func (c *Connector) Close() {
+	defer func() { recover() }()
 	c.conn.Close()
 	close(c.die)
 }

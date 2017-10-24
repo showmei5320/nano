@@ -50,6 +50,7 @@ var (
 		checkOrigin func(*http.Request) bool // check origin when websocket enabled
 		debug       bool                     // enable debug
 		wsPath      string                   // WebSocket path(eg: ws://127.0.0.1/wsPath)
+		dict        map[string]uint16
 
 		// session closed handlers
 		muCallbacks sync.RWMutex           // protect callbacks
@@ -79,6 +80,7 @@ func init() {
 	env.die = make(chan bool)
 	env.heartbeat = 30 * time.Second
 	env.debug = false
+	env.dict = make(map[string]uint16)
 	env.muCallbacks = sync.RWMutex{}
 	env.checkOrigin = func(_ *http.Request) bool { return true }
 }

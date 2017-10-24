@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/kensomanpow/nano/component"
-	"github.com/kensomanpow/nano/internal/message"
 )
 
 // Listen listens on the TCP network address addr
@@ -77,9 +76,10 @@ func OnSessionClosed(cb SessionClosedHandler) {
 }
 
 // SetDictionary set routes map, TODO(warning): set dictionary in runtime would be a dangerous operation!!!!!!
-func SetDictionary(dict map[string]uint16) {
-	message.SetDictionary(dict)
-}
+// func SetDictionary(dict map[string]uint16) {
+// 	message.SetDictionary(dict)
+// 	env.dict = dict
+// }
 
 func SetWSPath(path string) {
 	env.wsPath = path

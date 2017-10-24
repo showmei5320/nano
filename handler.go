@@ -49,7 +49,10 @@ var (
 func hbdEncode() {
 	data, err := json.Marshal(map[string]interface{}{
 		"code": 200,
-		"sys":  map[string]float64{"heartbeat": env.heartbeat.Seconds()},
+		"sys": map[string]interface{}{
+			"heartbeat": env.heartbeat.Seconds(),
+			"dict":      env.dict,
+		},
 	})
 	if err != nil {
 		panic(err)
@@ -174,8 +177,13 @@ func (h *handlerService) register(comp component.Component, opts []component.Opt
 	// register all handlers
 	h.services[s.Name] = s
 	for name, handler := range s.Handlers {
-		h.handlers[fmt.Sprintf("%s.%s", s.Name, name)] = handler
+		fullName := fmt.Sprintf("%s.%s", s.Name, name)
+		// compressed route start index from 1
+		env.dict[fullName] = uint16(len(env.dict)) + 1
+		h.handlers[fullName] = handler
 	}
+	message.SetDictionary(env.dict)
+
 	return nil
 }
 

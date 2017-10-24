@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
 	"sync/atomic"
 	"syscall"
 	"testing"
@@ -57,7 +58,7 @@ func client() {
 	c := NewConnector()
 
 	if err := c.Start(addr); err != nil {
-		panic(err)
+		// panic(err)
 	}
 
 	chReady := make(chan struct{})
@@ -75,6 +76,7 @@ func client() {
 }
 
 func TestIO(t *testing.T) {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	go server()
 
 	// wait server startup
