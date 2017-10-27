@@ -78,6 +78,8 @@ type (
 	}
 
 	unhandledMessage struct {
+		agent   *agent
+		lastMid uint
 		handler reflect.Method
 		args    []reflect.Value
 	}
@@ -143,6 +145,7 @@ func (h *handlerService) dispatch() {
 	for {
 		select {
 		case m := <-h.chLocalProcess: // logic dispatch
+			m.agent.lastMid = m.lastMid
 			pcall(m.handler, m.args)
 
 		case s := <-h.chCloseSession: // session closed callback
@@ -275,11 +278,12 @@ func (h *handlerService) processPacket(agent *agent, p *packet.Packet) error {
 }
 
 func (h *handlerService) processMessage(agent *agent, msg *message.Message) {
+	var lastMid uint
 	switch msg.Type {
 	case message.Request:
-		agent.lastMid = msg.ID
+		lastMid = msg.ID
 	case message.Notify:
-		agent.lastMid = 0
+		lastMid = 0
 	}
 
 	handler, ok := h.handlers[msg.Route]
@@ -288,12 +292,24 @@ func (h *handlerService) processMessage(agent *agent, msg *message.Message) {
 		return
 	}
 
+	var payload = msg.Data
+	var err error
+	if len(Pipeline.Inbound.handlers) > 0 {
+		for _, h := range Pipeline.Inbound.handlers {
+			payload, err = h(agent.session, payload)
+			if err != nil {
+				logger.Println(fmt.Sprintf("nano/handler: broken pipeline: %s", err.Error()))
+				return
+			}
+		}
+	}
+
 	var data interface{}
 	if handler.IsRawArg {
-		data = msg.Data
+		data = payload
 	} else {
 		data = reflect.New(handler.Type.Elem()).Interface()
-		err := serializer.Unmarshal(msg.Data, data)
+		err := serializer.Unmarshal(payload, data)
 		if err != nil {
 			logger.Println("deserialize error", err.Error())
 			return
@@ -305,7 +321,7 @@ func (h *handlerService) processMessage(agent *agent, msg *message.Message) {
 	}
 
 	args := []reflect.Value{handler.Receiver, agent.srv, reflect.ValueOf(data)}
-	h.chLocalProcess <- unhandledMessage{handler.Method, args}
+	h.chLocalProcess <- unhandledMessage{agent, lastMid, handler.Method, args}
 }
 
 // DumpServices outputs all registered services

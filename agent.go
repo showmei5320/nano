@@ -125,7 +125,7 @@ func (a *agent) Push(route string, v interface{}) error {
 // Response, implementation for session.NetworkEntity interface
 // Response message to session
 func (a *agent) Response(v interface{}) error {
-	return a.ResponseMID(a.session.MID(), v)
+	return a.ResponseMID(a.lastMid, v)
 }
 
 // Response, implementation for session.NetworkEntity interface
@@ -241,6 +241,16 @@ func (a *agent) write() {
 			if err != nil {
 				logger.Println(err.Error())
 				break
+			}
+
+			if len(Pipeline.Outbound.handlers) > 0 {
+				for _, h := range Pipeline.Outbound.handlers {
+					payload, err = h(a.session, payload)
+					if err != nil {
+						logger.Println("broken pipeline", err.Error())
+						break
+					}
+				}
 			}
 
 			// construct message and encode
