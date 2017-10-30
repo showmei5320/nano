@@ -34,6 +34,14 @@ import (
 	"github.com/kensomanpow/nano/session"
 )
 
+type HandShakeData struct {
+	Token string
+	Sys   struct {
+		Type    string
+		Version string
+	}
+}
+
 // Unhandled message buffer size
 const packetBacklog = 1024
 
@@ -242,13 +250,22 @@ func (h *handlerService) handle(conn net.Conn) {
 func (h *handlerService) processPacket(agent *agent, p *packet.Packet) error {
 	switch p.Type {
 	case packet.Handshake:
-		if _, err := agent.conn.Write(hrd); err != nil {
-			return err
-		}
+		var handShakeData HandShakeData
+		serializer.Unmarshal(p.Data, &handShakeData)
+		ok := env.authFunc(agent.session, handShakeData.Token)
 
-		agent.setStatus(statusHandshake)
-		if env.debug {
-			logger.Println(fmt.Sprintf("Session handshake Id=%d, Remote=%s", agent.session.ID(), agent.conn.RemoteAddr()))
+		if !ok {
+			agent.Close()
+		} else {
+			if _, err := agent.conn.Write(hrd); err != nil {
+				return err
+			}
+
+			agent.session.Auth = true
+			agent.setStatus(statusHandshake)
+			if env.debug {
+				logger.Println(fmt.Sprintf("Session handshake Id=%d, Remote=%s", agent.session.ID(), agent.conn.RemoteAddr()))
+			}
 		}
 
 	case packet.HandshakeAck:
@@ -320,6 +337,7 @@ func (h *handlerService) processMessage(agent *agent, msg *message.Message) {
 		logger.Println(fmt.Sprintf("UID=%d, Message={%s}, Data=%+v", agent.session.UID(), msg.String(), data))
 	}
 
+	agent.session.LastHandlerAccessTime = time.Now()
 	args := []reflect.Value{handler.Receiver, agent.srv, reflect.ValueOf(data)}
 	h.chLocalProcess <- unhandledMessage{agent, lastMid, handler.Method, args}
 }

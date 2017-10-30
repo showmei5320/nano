@@ -50,12 +50,14 @@ var (
 // Session instance related to the client will be passed to Handler method as the first
 // parameter.
 type Session struct {
-	sync.RWMutex                        // protect data
-	id           int64                  // session global unique id
-	uid          int64                  // binding user id
-	lastTime     int64                  // last heartbeat time
-	entity       NetworkEntity          // low-level network entity
-	data         map[string]interface{} // session data store
+	sync.RWMutex                                 // protect data
+	id                    int64                  // session global unique id
+	uid                   int64                  // binding user id
+	lastTime              int64                  // last heartbeat time
+	entity                NetworkEntity          // low-level network entity
+	data                  map[string]interface{} // session data store
+	Auth                  bool
+	LastHandlerAccessTime time.Time
 }
 
 // New returns a new session instance
@@ -66,6 +68,8 @@ func New(entity NetworkEntity) *Session {
 		entity:   entity,
 		data:     make(map[string]interface{}),
 		lastTime: time.Now().Unix(),
+		Auth:     false,
+		LastHandlerAccessTime: time.Now(),
 	}
 }
 

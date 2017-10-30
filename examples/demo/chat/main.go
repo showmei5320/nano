@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"time"
 
+	"strings"
+
 	"github.com/kensomanpow/nano"
 	"github.com/kensomanpow/nano/component"
 	"github.com/kensomanpow/nano/serialize/json"
 	"github.com/kensomanpow/nano/session"
-	"strings"
 )
 
 type (

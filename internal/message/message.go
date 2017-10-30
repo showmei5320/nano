@@ -99,7 +99,7 @@ func routable(t Type) bool {
 }
 
 func invalidType(t Type) bool {
-	return t < Request || t > Push
+	return t != 0x05 && (t < Request || t > Push)
 
 }
 

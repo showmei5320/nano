@@ -21,10 +21,12 @@
 package nano
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/kensomanpow/nano/component"
+	"github.com/kensomanpow/nano/session"
 )
 
 // Listen listens on the TCP network address addr
@@ -83,4 +85,21 @@ func OnSessionClosed(cb SessionClosedHandler) {
 
 func SetWSPath(path string) {
 	env.wsPath = path
+}
+
+func SetAuthFunc(authFunc func(session *session.Session, token string) bool) {
+	if authFunc != nil {
+		env.authFunc = authFunc
+		Pipeline.Inbound.PushBack(func(s *session.Session, in []byte) (out []byte, err error) {
+			if !s.Auth {
+				s.Close()
+				return nil, errors.New("the session is not authed")
+			}
+			return in, nil
+		})
+	}
+}
+
+func SetSessionExpireSecs(secs int) {
+	env.sessionExpireSecs = secs
 }
