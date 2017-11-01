@@ -42,6 +42,8 @@ func listen(addr string, isWs bool) {
 	// by SetTimerPrecision
 	globalTicker = time.NewTicker(timerPrecision)
 
+	sessionExpiredTimer()
+
 	// startup logic dispatcher
 	go handler.dispatch()
 
@@ -120,6 +122,9 @@ func sessionExpiredTimer() {
 		case <-tick.C:
 			for i := range AgentGroup.sessions {
 				if time.Now().Sub(AgentGroup.sessions[i].LastHandlerAccessTime) > time.Duration(env.sessionExpireSecs)*time.Second {
+					if env.debug {
+						logger.Println(fmt.Sprintf("sessionExpired kick %d", AgentGroup.sessions[i].UID()))
+					}
 					AgentGroup.Leave(AgentGroup.sessions[i])
 					AgentGroup.sessions[i].Close()
 				}
