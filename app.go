@@ -116,17 +116,19 @@ func listenAndServeWS(addr string) {
 }
 
 func sessionExpiredTimer() {
-	tick := time.NewTicker(time.Duration(env.sessionExpireSecs) * time.Second)
+	tick := time.NewTicker(time.Second)
 	go func() {
-		select {
-		case <-tick.C:
-			for i := range AgentGroup.sessions {
-				if time.Now().Sub(AgentGroup.sessions[i].LastHandlerAccessTime) > time.Duration(env.sessionExpireSecs)*time.Second {
-					if env.debug {
-						logger.Println(fmt.Sprintf("sessionExpired kick %d", AgentGroup.sessions[i].UID()))
+		for {
+			select {
+			case <-tick.C:
+				for i := range AgentGroup.sessions {
+					if time.Now().Sub(AgentGroup.sessions[i].LastHandlerAccessTime) > time.Duration(env.sessionExpireSecs)*time.Second {
+						if env.debug {
+							logger.Println(fmt.Sprintf("sessionExpired kick %d", AgentGroup.sessions[i].UID()))
+						}
+						AgentGroup.Leave(AgentGroup.sessions[i])
+						AgentGroup.sessions[i].Close()
 					}
-					AgentGroup.Leave(AgentGroup.sessions[i])
-					AgentGroup.sessions[i].Close()
 				}
 			}
 		}
