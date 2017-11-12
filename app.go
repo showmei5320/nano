@@ -124,9 +124,8 @@ func sessionExpiredTimer() {
 				for i := range AgentGroup.sessions {
 					if time.Now().Sub(AgentGroup.sessions[i].LastHandlerAccessTime) > time.Duration(env.sessionExpireSecs)*time.Second {
 						if env.debug {
-							logger.Println(fmt.Sprintf("sessionExpired kick %d", AgentGroup.sessions[i].UID()))
+							logger.Println(fmt.Sprintf("sessionExpired kick UID [%d]", AgentGroup.sessions[i].UID()))
 						}
-						AgentGroup.Leave(AgentGroup.sessions[i])
 						AgentGroup.sessions[i].Close()
 					}
 				}
