@@ -87,7 +87,7 @@ func SetWSPath(path string) {
 	env.wsPath = path
 }
 
-func SetAuthFunc(authFunc func(session *session.Session, token string) bool) {
+func SetAuthFunc(authFunc func(session *session.Session, handshakeData *HandShakeData) bool) {
 	if authFunc != nil {
 		env.authFunc = authFunc
 		Pipeline.Inbound.PushBack(func(s *session.Session, in []byte) (out []byte, err error) {

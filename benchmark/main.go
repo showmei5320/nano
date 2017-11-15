@@ -1,6 +1,6 @@
 // +build benchmark
 
-package io
+package main
 
 import (
 	"log"
@@ -9,10 +9,10 @@ import (
 	"runtime"
 	"sync/atomic"
 	"syscall"
-	"testing"
 	"time"
 
 	"github.com/kensomanpow/nano"
+	"github.com/kensomanpow/nano/benchmark/io"
 	"github.com/kensomanpow/nano/benchmark/testdata"
 	"github.com/kensomanpow/nano/component"
 	"github.com/kensomanpow/nano/serialize/protobuf"
@@ -21,61 +21,18 @@ import (
 
 const (
 	addr = "127.0.0.1:13250" // local address
-	conc = 1000              // concurrent client count
+	conc = 200           // concurrent client count
 )
+
+var	metrics int32
 
 //
 type TestHandler struct {
 	component.Base
-	metrics int32
 }
 
-func (h *TestHandler) AfterInit() {
-	ticker := time.NewTicker(time.Second)
-
-	// metrics output ticker
-	go func() {
-		for range ticker.C {
-			println("QPS", atomic.LoadInt32(&h.metrics))
-			atomic.StoreInt32(&h.metrics, 0)
-		}
-	}()
-}
-
-func (h *TestHandler) Ping(s *session.Session, data *testdata.Ping) error {
-	atomic.AddInt32(&h.metrics, 1)
-	return s.Push("pong", &testdata.Pong{Content: data.Content})
-}
-
-func server() {
-	nano.Register(&TestHandler{})
-	nano.SetSerializer(protobuf.NewSerializer())
-
-	nano.Listen(addr)
-}
-
-func client() {
-	c := NewConnector()
-
-	if err := c.Start(addr); err != nil {
-		// panic(err)
-	}
-
-	chReady := make(chan struct{})
-	c.OnConnected(func() {
-		chReady <- struct{}{}
-	})
-
-	c.On("pong", func(data interface{}) {})
-
-	<-chReady
-	for {
-		c.Notify("TestHandler.Ping", &testdata.Ping{})
-		time.Sleep(10 * time.Millisecond)
-	}
-}
-
-func TestIO(t *testing.T) {
+func main() {
+	atomic.StoreInt32(&metrics, 0)
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	go server()
 
@@ -92,5 +49,51 @@ func TestIO(t *testing.T) {
 
 	<-sg
 
-	t.Log("exit")
+}
+
+func (h *TestHandler) AfterInit() {
+	ticker := time.NewTicker(time.Second)
+
+	// metrics output ticker
+	go func() {
+		for range ticker.C {
+			println("QPS", atomic.LoadInt32(&metrics))
+			atomic.StoreInt32(&metrics, 0)
+		}
+	}()
+}
+
+func (h *TestHandler) Ping(s *session.Session, data *testdata.Ping) error {
+	return s.Push("pong", &testdata.Pong{Content: data.Content})
+}
+
+func server() {
+	nano.Register(&TestHandler{})
+	nano.SetSerializer(protobuf.NewSerializer())
+	nano.SetLogger(log.New(os.Stdout, "", log.LstdFlags|log.Llongfile))
+
+	nano.Listen(addr)
+}
+
+func client() {
+	c := io.NewConnector()
+	
+	if err := c.Start(addr); err != nil {
+		panic(err)
+	}
+
+	chReady := make(chan struct{})
+	c.OnConnected(func() {
+		chReady <- struct{}{}
+	})
+
+	c.On("pong", func(data interface{}) {
+		atomic.AddInt32(&metrics, 1)
+	})
+
+	<-chReady
+	for {
+		c.Notify("TestHandler.Ping", &testdata.Ping{})
+		time.Sleep(2 * time.Millisecond)
+	}
 }

@@ -35,8 +35,9 @@ import (
 )
 
 type HandShakeData struct {
-	Token string
-	Sys   struct {
+	Token  string
+	GameID uint32
+	Sys    struct {
 		Type    string
 		Version string
 	}
@@ -250,21 +251,26 @@ func (h *handlerService) handle(conn net.Conn) {
 func (h *handlerService) processPacket(agent *agent, p *packet.Packet) error {
 	switch p.Type {
 	case packet.Handshake:
-		var handShakeData HandShakeData
+		var handShakeData *HandShakeData
 		serializer.Unmarshal(p.Data, &handShakeData)
-		ok := env.authFunc(agent.session, handShakeData.Token)
+		if env.authFunc != nil {
+			ok := env.authFunc(agent.session, handShakeData)
+			if !ok {
+				agent.Close()
+			} else {
+				if _, err := agent.conn.Write(hrd); err != nil {
+					return err
+				}
 
-		if !ok {
-			agent.Close()
+				agent.session.Auth = true
+				agent.setStatus(statusHandshake)
+				if env.debug {
+					logger.Println(fmt.Sprintf("Session handshake Id=%d, Remote=%s", agent.session.ID(), agent.conn.RemoteAddr()))
+				}
+			}
 		} else {
 			if _, err := agent.conn.Write(hrd); err != nil {
 				return err
-			}
-
-			agent.session.Auth = true
-			agent.setStatus(statusHandshake)
-			if env.debug {
-				logger.Println(fmt.Sprintf("Session handshake Id=%d, Remote=%s", agent.session.ID(), agent.conn.RemoteAddr()))
 			}
 		}
 

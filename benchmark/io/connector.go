@@ -91,7 +91,7 @@ func NewConnector() *Connector {
 func (c *Connector) Start(addr string) error {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
-		return err
+		return nil
 	}
 
 	c.conn = conn
