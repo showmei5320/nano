@@ -154,8 +154,10 @@ func (h *handlerService) dispatch() {
 	for {
 		select {
 		case m := <-h.chLocalProcess: // logic dispatch
-			m.agent.lastMid = m.lastMid
-			pcall(m.handler, m.args)
+			if m.agent.status() != statusClosed {
+				m.agent.lastMid = m.lastMid
+				pcall(m.handler, m.args)
+			}
 
 		case s := <-h.chCloseSession: // session closed callback
 			onSessionClosed(s)

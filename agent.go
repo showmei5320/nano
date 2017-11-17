@@ -162,6 +162,7 @@ func (a *agent) ResponseMID(mid uint, v interface{}) error {
 // Close closes the agent, clean inner state and close low-level connection.
 // Any blocked Read or Write operations will be unblocked and return errors.
 func (a *agent) Close() error {
+	AgentGroup.Leave(a.session)
 	if a.status() == statusClosed {
 		return ErrCloseClosedSession
 	}
@@ -171,8 +172,6 @@ func (a *agent) Close() error {
 		logger.Println(fmt.Sprintf("Session closed, ID=%d, UID=%d, IP=%s",
 			a.session.ID(), a.session.UID(), a.conn.RemoteAddr()))
 	}
-
-	AgentGroup.Leave(a.session)
 
 	// prevent closing closed channel
 	select {
