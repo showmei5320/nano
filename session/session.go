@@ -35,6 +35,7 @@ type NetworkEntity interface {
 	Push(route string, v interface{}) error
 	MID() uint
 	Response(v interface{}) error
+	Kick(v interface{}) error
 	ResponseMID(mid uint, v interface{}) error
 	Close() error
 	RemoteAddr() net.Addr
@@ -81,6 +82,10 @@ func (s *Session) Push(route string, v interface{}) error {
 // Response message to client
 func (s *Session) Response(v interface{}) error {
 	return s.entity.Response(v)
+}
+
+func (s *Session) Kick(v interface{}) error {
+	return s.entity.Kick(v)
 }
 
 // ResponseMID responses message to client, mid is

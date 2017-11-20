@@ -51,7 +51,7 @@ var (
 		debug             bool                     // enable debug
 		wsPath            string                   // WebSocket path(eg: ws://127.0.0.1/wsPath)
 		dict              map[string]uint16
-		authFunc          func(session *session.Session, handshakeData *HandShakeData) bool
+		authFunc          func(session *session.Session, handshakeData *HandShakeData) interface{}
 		sessionExpireSecs int
 
 		// session closed handlers
