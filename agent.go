@@ -52,15 +52,14 @@ type (
 	// Agent corresponding a user, used for store raw conn information
 	agent struct {
 		// regular agent member
-		session    *session.Session    // session
-		conn       net.Conn            // low-level conn fd
-		lastMid    uint                // last message id
-		state      int32               // current agent state
-		chDie      chan struct{}       // wait for close
-		chSend     chan pendingMessage // push message queue
-		chReadSTop chan int
-		lastAt     int64          // last heartbeat unix time stamp
-		decoder    *codec.Decoder // binary decoder
+		session *session.Session    // session
+		conn    net.Conn            // low-level conn fd
+		lastMid uint                // last message id
+		state   int32               // current agent state
+		chDie   chan struct{}       // wait for close
+		chSend  chan pendingMessage // push message queue
+		lastAt  int64               // last heartbeat unix time stamp
+		decoder *codec.Decoder      // binary decoder
 
 		srv reflect.Value // cached session reflect.Value
 	}
@@ -82,13 +81,12 @@ type (
 // Create new agent instance
 func newAgent(conn net.Conn) *agent {
 	a := &agent{
-		conn:       conn,
-		state:      statusStart,
-		chDie:      make(chan struct{}),
-		lastAt:     time.Now().Unix(),
-		chSend:     make(chan pendingMessage, agentWriteBacklog),
-		chReadSTop: make(chan int, 1),
-		decoder:    codec.NewDecoder(),
+		conn:    conn,
+		state:   statusStart,
+		chDie:   make(chan struct{}),
+		lastAt:  time.Now().Unix(),
+		chSend:  make(chan pendingMessage, agentWriteBacklog),
+		decoder: codec.NewDecoder(),
 	}
 
 	// binding session

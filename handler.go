@@ -223,36 +223,28 @@ func (h *handlerService) handle(conn net.Conn) {
 	// read loop
 	buf := make([]byte, 2048)
 	for {
-		select {
-		case <-agent.chReadSTop:
-			if env.debug {
-				logger.Println(fmt.Sprintf("Session stop read, SessionID=%d, UID=%d", agent.session.ID(), agent.session.UID()))
-			}
+		n, err := conn.Read(buf)
+		if err != nil {
+			logger.Println(fmt.Sprintf("Read message error: %s, session will be closed immediately", err.Error()))
 			return
-		default:
-			n, err := conn.Read(buf)
-			if err != nil {
-				logger.Println(fmt.Sprintf("Read message error: %s, session will be closed immediately", err.Error()))
-				return
-			}
+		}
 
-			// TODO(warning): decoder use slice for performance, packet data should be copy before next Decode
-			packets, err := agent.decoder.Decode(buf[:n])
-			if err != nil {
+		// TODO(warning): decoder use slice for performance, packet data should be copy before next Decode
+		packets, err := agent.decoder.Decode(buf[:n])
+		if err != nil {
+			logger.Println(err.Error())
+			return
+		}
+
+		if len(packets) < 1 {
+			continue
+		}
+
+		// process all packet
+		for i := range packets {
+			if err := h.processPacket(agent, packets[i]); err != nil {
 				logger.Println(err.Error())
 				return
-			}
-
-			if len(packets) < 1 {
-				continue
-			}
-
-			// process all packet
-			for i := range packets {
-				if err := h.processPacket(agent, packets[i]); err != nil {
-					logger.Println(err.Error())
-					return
-				}
 			}
 		}
 	}
