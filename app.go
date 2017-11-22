@@ -34,6 +34,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var server *http.Server
+
 func listen(addr string, isWs bool) {
 	startupComponents()
 	hbdEncode()
@@ -62,6 +64,7 @@ func listen(addr string, isWs bool) {
 	// stop server
 	select {
 	case <-env.die:
+		server.Shutdown(nil)
 		logger.Println("The app will shutdown in a few seconds")
 	case s := <-sg:
 		logger.Println("got signal", s)
@@ -100,19 +103,28 @@ func listenAndServeWS(addr string) {
 		CheckOrigin:     env.checkOrigin,
 	}
 
-	http.HandleFunc("/"+strings.TrimPrefix(env.wsPath, "/"), func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			logger.Println(fmt.Sprintf("Upgrade failure, URI=%s, Error=%s", r.RequestURI, err.Error()))
-			return
-		}
+	// restart
+	if server == nil {
+		http.HandleFunc("/"+strings.TrimPrefix(env.wsPath, "/"), func(w http.ResponseWriter, r *http.Request) {
+			conn, err := upgrader.Upgrade(w, r, nil)
+			if err != nil {
+				logger.Println(fmt.Sprintf("Upgrade failure, URI=%s, Error=%s", r.RequestURI, err.Error()))
+				return
+			}
 
-		handler.handleWS(conn)
-	})
-
-	if err := http.ListenAndServe(addr, nil); err != nil {
-		logger.Fatal(err.Error())
+			handler.handleWS(conn)
+		})
 	}
+
+	server = &http.Server{
+		Addr:           addr,
+		Handler:        http.DefaultServeMux,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	server.ListenAndServe()
 }
 
 func sessionExpiredTimer() {

@@ -60,7 +60,8 @@ func SetCheckOriginFunc(fn func(*http.Request) bool) {
 
 // Shutdown send a signal to let 'nano' shutdown itself.
 func Shutdown() {
-	close(env.die)
+	env.die <- true
+	// close(env.die)
 }
 
 // EnableDebug let 'nano' to run under debug mode.
