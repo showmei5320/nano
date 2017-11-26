@@ -57,7 +57,7 @@ func isHandlerMethod(method reflect.Method) bool {
 	}
 
 	// Method needs three ins: receiver, *Session, []byte or pointer.
-	if mt.NumIn() != 3 {
+	if mt.NumIn() != 4 && mt.NumIn() != 3 {
 		return false
 	}
 
@@ -73,5 +73,10 @@ func isHandlerMethod(method reflect.Method) bool {
 	if (mt.In(2).Kind() != reflect.Ptr && mt.In(2) != typeOfBytes) || mt.Out(0) != typeOfError {
 		return false
 	}
+
+	if mt.NumIn() == 4 && mt.In(3).Kind() != reflect.Func {
+		return false
+	}
+
 	return true
 }

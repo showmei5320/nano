@@ -21,7 +21,6 @@
 package nano
 
 import (
-	"errors"
 	"net/http"
 	"time"
 
@@ -91,13 +90,13 @@ func SetWSPath(path string) {
 func SetAuthFunc(authFunc func(session *session.Session, handshakeData *HandShakeData) interface{}) {
 	if authFunc != nil {
 		env.authFunc = authFunc
-		Pipeline.Inbound.PushBack(func(s *session.Session, in []byte) (out []byte, err error) {
-			if !s.Auth {
-				s.Close()
-				return nil, errors.New("the session is not authed")
-			}
-			return in, nil
-		})
+		// Pipeline.Inbound.PushBack(func(s *session.Session, in []byte) (out []byte, err error) {
+		// 	if !s.Auth {
+		// 		s.Close()
+		// 		return nil, errors.New("the session is not authed")
+		// 	}
+		// 	return in, nil
+		// })
 	}
 }
 

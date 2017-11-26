@@ -119,8 +119,8 @@ func listenAndServeWS(addr string) {
 	server = &http.Server{
 		Addr:           addr,
 		Handler:        http.DefaultServeMux,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+		ReadTimeout:    20 * time.Second,
+		WriteTimeout:   40 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 

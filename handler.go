@@ -156,7 +156,7 @@ func (h *handlerService) dispatch() {
 		case m := <-h.chLocalProcess: // logic dispatch
 			if m.agent.status() != statusClosed {
 				m.agent.lastMid = m.lastMid
-				pcall(m.handler, m.args)
+				go pcall(m.handler, m.args)
 			}
 
 		case s := <-h.chCloseSession: // session closed callback
@@ -345,8 +345,11 @@ func (h *handlerService) processMessage(agent *agent, msg *message.Message) {
 		logger.Println(fmt.Sprintf("UID=%d, Message={%s}, Data=%+v", agent.session.UID(), msg.String(), data))
 	}
 
-	agent.session.LastHandlerAccessTime = time.Now()
-	args := []reflect.Value{handler.Receiver, agent.srv, reflect.ValueOf(data)}
+	// agent.session.LastHandlerAccessTime = time.Now()
+	resFunc := func(v interface{}) error {
+		return agent.session.ResponseMID(lastMid, v)
+	}
+	args := []reflect.Value{handler.Receiver, agent.srv, reflect.ValueOf(data), reflect.ValueOf(resFunc)}
 	h.chLocalProcess <- unhandledMessage{agent, lastMid, handler.Method, args}
 }
 
