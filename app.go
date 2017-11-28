@@ -133,12 +133,15 @@ func sessionExpiredTimer() {
 		for {
 			select {
 			case <-tick.C:
-				for i := range AgentGroup.sessions {
-					if time.Now().Sub(AgentGroup.sessions[i].LastHandlerAccessTime) > time.Duration(env.sessionExpireSecs)*time.Second {
+				t := time.Now()
+				for _, uid := range AgentGroup.Members() {
+					s, _ := AgentGroup.Member(uid)
+					if s != nil && t.Sub(s.LastHandlerAccessTime) > time.Duration(env.sessionExpireSecs)*time.Second {
 						if env.debug {
-							logger.Println(fmt.Sprintf("sessionExpired kick UID [%d]", AgentGroup.sessions[i].UID()))
+							logger.Println(fmt.Sprintf("sessionExpired kick UID [%d]", uid))
 						}
-						AgentGroup.sessions[i].Close()
+						s.Close()
+						AgentGroup.Leave(s)
 					}
 				}
 			}

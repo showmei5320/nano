@@ -345,11 +345,14 @@ func (h *handlerService) processMessage(agent *agent, msg *message.Message) {
 		logger.Println(fmt.Sprintf("UID=%d, Message={%s}, Data=%+v", agent.session.UID(), msg.String(), data))
 	}
 
-	// agent.session.LastHandlerAccessTime = time.Now()
+	agent.session.LastHandlerAccessTime = time.Now()
 	resFunc := func(v interface{}) error {
 		return agent.session.ResponseMID(lastMid, v)
 	}
-	args := []reflect.Value{handler.Receiver, agent.srv, reflect.ValueOf(data), reflect.ValueOf(resFunc)}
+	args := []reflect.Value{handler.Receiver, agent.srv, reflect.ValueOf(data)}
+	if msg.Type == message.Request {
+		args = append(args, reflect.ValueOf(resFunc))
+	}
 	h.chLocalProcess <- unhandledMessage{agent, lastMid, handler.Method, args}
 }
 

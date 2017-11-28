@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -46,6 +47,8 @@ var (
 	ErrBufferExceed = errors.New("session send buffer exceed")
 	// AgentGroup 裝所有的Agent
 	AgentGroup = NewGroup("agents")
+
+	AgentGroupLock = sync.RWMutex{}
 )
 
 type (
