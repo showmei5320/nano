@@ -232,8 +232,8 @@ func (a *agent) write() {
 	// clean func
 	defer func() {
 		ticker.Stop()
-		close(a.chSend)
-		close(chWrite)
+		// close(a.chSend)
+		// close(chWrite)
 		a.Close()
 		if env.debug {
 			logger.Println(fmt.Sprintf("Session write goroutine exit, SessionID=%d, UID=%d", a.session.ID(), a.session.UID()))
