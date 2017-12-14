@@ -35,9 +35,10 @@ import (
 )
 
 type HandShakeData struct {
-	Token  string
-	GameID uint32
-	Sys    struct {
+	Token             string
+	GameID            uint32
+	FishLaunchVersion string
+	Sys               struct {
 		Type    string
 		Version string
 	}
@@ -61,6 +62,8 @@ func hbdEncode() {
 		"sys": map[string]interface{}{
 			"heartbeat": env.heartbeat.Seconds(),
 			"dict":      env.dict,
+			"version":   env.version,
+			"payLoad":   env.payload,
 		},
 	})
 	if err != nil {

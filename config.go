@@ -53,6 +53,8 @@ var (
 		dict              map[string]uint16
 		authFunc          func(session *session.Session, handshakeData *HandShakeData) interface{}
 		sessionExpireSecs int
+		version           string
+		payload           interface{}
 
 		// session closed handlers
 		muCallbacks sync.RWMutex           // protect callbacks

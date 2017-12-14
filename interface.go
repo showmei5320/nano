@@ -103,3 +103,11 @@ func SetAuthFunc(authFunc func(session *session.Session, handshakeData *HandShak
 func SetSessionExpireSecs(secs int) {
 	env.sessionExpireSecs = secs
 }
+
+func SetVersion(version string) {
+	env.version = version
+}
+
+func SetHandShakePayload(payload interface{}) {
+	env.payload = payload
+}
