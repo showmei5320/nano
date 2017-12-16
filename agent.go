@@ -201,7 +201,9 @@ func (a *agent) Close() error {
 		// expect
 	default:
 		close(a.chDie)
-		handler.chCloseSession <- a.session
+		if a.session.UID() != 0 {
+			handler.chCloseSession <- a.session
+		}
 	}
 
 	return a.conn.Close()
