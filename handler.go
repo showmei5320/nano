@@ -42,6 +42,13 @@ type HandShakeData struct {
 		Type    string
 		Version string
 	}
+	GuestParams               struct {
+		StartPoint 	 	float64
+		FixUid 			string
+		OneShot 		bool
+		FishType		int32
+		FixSection		int32
+	}
 }
 
 // Unhandled message buffer size
