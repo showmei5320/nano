@@ -27,27 +27,27 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/kensomanpow/nano/component"
-	"github.com/kensomanpow/nano/internal/codec"
-	"github.com/kensomanpow/nano/internal/message"
-	"github.com/kensomanpow/nano/internal/packet"
-	"github.com/kensomanpow/nano/session"
+	"github.com/showmei5320/nano/component"
+	"github.com/showmei5320/nano/internal/codec"
+	"github.com/showmei5320/nano/internal/message"
+	"github.com/showmei5320/nano/internal/packet"
+	"github.com/showmei5320/nano/session"
 )
 
 type HandShakeData struct {
 	Token             string
-	GameID            uint32
+	GameID            string
 	FishLaunchVersion string
 	Sys               struct {
 		Type    string
 		Version string
 	}
-	GuestParams               struct {
-		StartPoint 	 	float64
-		FixUid 			string
-		OneShot 		bool
-		FishType		int32
-		FixSection		int32
+	GuestParams struct {
+		StartPoint float64
+		FixUid     string
+		OneShot    bool
+		FishType   int32
+		FixSection int32
 	}
 }
 

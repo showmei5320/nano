@@ -24,8 +24,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kensomanpow/nano/component"
-	"github.com/kensomanpow/nano/session"
+	"github.com/showmei5320/nano/component"
+	"github.com/showmei5320/nano/session"
 )
 
 // Listen listens on the TCP network address addr

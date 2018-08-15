@@ -21,7 +21,7 @@
 package nano
 
 import (
-	"github.com/kensomanpow/nano/component"
+	"github.com/showmei5320/nano/component"
 )
 
 var (

@@ -140,7 +140,10 @@ func sessionExpiredTimer() {
 						if env.debug {
 							logger.Println(fmt.Sprintf("sessionExpired kick UID [%d]", uid))
 						}
-						s.Close()
+						s.Kick(map[string]interface{}{
+							"Code":    9999,
+							"Message": "disconnect",
+						})
 						AgentGroup.Leave(s)
 					}
 				}

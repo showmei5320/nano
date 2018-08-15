@@ -1,6 +1,6 @@
 package nano
 
-import "github.com/kensomanpow/nano/session"
+import "github.com/showmei5320/nano/session"
 
 var Pipeline = struct {
 	Outbound, Inbound *pipelineChannel

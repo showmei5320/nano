@@ -28,7 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kensomanpow/nano/session"
+	"github.com/showmei5320/nano/session"
 )
 
 // VERSION returns current nano version
