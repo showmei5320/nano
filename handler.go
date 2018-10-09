@@ -48,6 +48,7 @@ type HandShakeData struct {
 		OneShot    bool
 		FishType   int32
 		FixSection int32
+		Fast       bool
 	}
 }
 
