@@ -142,7 +142,7 @@ func sessionExpiredTimer() {
 						}
 						s.Kick(map[string]interface{}{
 							"Code":    9999,
-							"Message": "disconnect",
+							"Message": "1",
 						})
 						AgentGroup.Leave(s)
 					}

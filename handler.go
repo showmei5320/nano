@@ -35,21 +35,13 @@ import (
 )
 
 type HandShakeData struct {
-	Token             string
-	GameID            string
-	FishLaunchVersion string
-	Sys               struct {
+	Token  string
+	GameID string
+	Sys    struct {
 		Type    string
 		Version string
 	}
-	GuestParams struct {
-		StartPoint float64
-		FixUid     string
-		OneShot    bool
-		FishType   int32
-		FixSection int32
-		Fast       bool
-	}
+	GuestParams map[string]interface{}
 }
 
 // Unhandled message buffer size
@@ -127,6 +119,7 @@ func pcall(method reflect.Method, args []reflect.Value) {
 
 	if r := method.Func.Call(args); len(r) > 0 {
 		if err := r[0].Interface(); err != nil {
+
 			logger.Println(err.(error).Error())
 		}
 	}
@@ -156,9 +149,14 @@ func onSessionClosed(s *session.Session) {
 func (h *handlerService) dispatch() {
 	// close chLocalProcess & chCloseSession when application quit
 	defer func() {
+		if err := recover(); err != nil {
+			logger.Println(fmt.Sprintf("Dispatcher exit unexpected: %v", err))
+			println(stack())
+		}
 		close(h.chLocalProcess)
 		close(h.chCloseSession)
 		globalTicker.Stop()
+		logger.Println("Main logic loop exit")
 	}()
 
 	// handle packet that sent to chLocalProcess
@@ -183,6 +181,7 @@ func (h *handlerService) dispatch() {
 			delete(timerManager.timers, id)
 
 		case <-env.die: // application quit signal
+			logger.Println("Got exit instruction, break logic loop")
 			return
 		}
 	}
